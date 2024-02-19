@@ -7,6 +7,7 @@
     chmod 700 get_helm.sh
     chown {{ lookup('env','USER') }}:{{ lookup('env','USER') }} get_helm.sh
     ./get_helm.sh
+    helm plugin install https://github.com/databus23/helm-diff > /dev/null
   register: helmstatus
   ignore_errors: yes
   tags: status
@@ -71,6 +72,7 @@
     release_values:
       hostname: "{{ hostname }}"
       bootstrapPassword: "{{ bootstrapPassword }}"
+    wait: true
   tags:
     - rancher
     - status
