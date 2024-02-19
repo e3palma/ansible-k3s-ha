@@ -1,0 +1,7 @@
+---
+- import_tasks: kubectl.yml
+- import_tasks: master.yml
+- import_tasks: nodes.yml
+- import_tasks: loadbalancer.yml
+- import_tasks: rancher.yml
+- import_tasks: longhorn.yml

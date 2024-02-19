@@ -1,0 +1,23 @@
+---
+- name: Check if k3sup exists
+  stat:
+    path: "/usr/local/bin/k3sup"
+  register: path_exists
+
+- name: Fetch k3sup setup
+  get_url:
+    url: https://get.k3sup.dev
+    dest: /usr/local/bin/getk3sup.sh
+    mode: 0755
+  become: yes
+  register: fetchgetk3sup
+  when: not path_exists.stat.exists
+
+
+- name: Install k3sup binary
+  when: fetchgetk3sup is succeeded
+  command: /usr/local/bin/getk3sup.sh
+  become: yes
+  register: 
+  when: not path_exists.stat.exists
+

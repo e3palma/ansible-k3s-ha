@@ -1,0 +1,38 @@
+---
+
+- name: Copy Longhorn.yml
+  template:
+    src: "longhorn.yaml.j2"
+    dest: /home/{{ lookup('env','USER') }}/longhorn.yaml
+  tags: longhorn
+
+- name: Deploy Longhorn
+  kubernetes.core.k8s:
+    state: present
+    src: /home/{{ lookup('env','USER') }}/longhorn.yaml
+  tags: longorn
+
+- name: Get longhorn-system pods
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Pod
+    namespace: longhorn-system
+  register: longhorn
+  tags: longorn
+
+- name: Longhorn
+  debug: var=longhorn
+  tags: longhorn
+
+- name: Deploy Longhorn Status
+  shell: |
+    kubectl get pods --namespace longhorn-system --watch
+    kubectl get nodes
+    kubectl get svc -n longhorn-system
+  register: longhornstatus
+  ignore_errors: yes
+  tags: longhorn
+
+- name: LonghornStatus
+  debug: var=longhornstatus
+  tags: longhorn

@@ -1,0 +1,13 @@
+---
+
+- hosts: localhost
+  tasks:
+  
+    - name: Firewall loop
+      include_tasks: inner.yaml
+      with_items: '{{ cluster }}'
+      loop_control:
+         loop_var: inner_var_name
+      vars:
+       cluster:
+        - "{{ groups['k3s_cluster']}}"

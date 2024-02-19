@@ -1,0 +1,29 @@
+---
+
+- name: Check if k3s master 
+  stat:
+    path: "/usr/local/bin/k3s-uninstall.sh"
+  register: masterfound
+
+- name: Check if k3s agent
+  stat:
+    path: "/usr/local/bin/k3s-agent-uninstall.sh"
+  register: agentfound
+
+- name: Uninstall K3S (Master)
+  command:
+    cmd: /usr/local/bin/k3s-uninstall.sh 
+  register: master_uninstall
+  when: masterfound.stat.exists   
+  
+- name: Uninstall K3S (Agent)
+  command:
+    cmd: /usr/local/bin/k3s-agent-uninstall.sh                
+  register: agent_uninstall
+  when: agentfound.stat.exists  
+
+
+- name: reboot
+  reboot:
+  when: agent_uninstall.changed or master_uninstall.changed
+

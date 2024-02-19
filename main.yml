@@ -1,0 +1,11 @@
+---
+- hosts: k3s_cluster
+  become: yes
+  roles:
+    - container_features
+    - dphys_swapfile
+
+- hosts: localhost
+  roles:
+    - bootstrap_k3sup
+    - k3s_cluster

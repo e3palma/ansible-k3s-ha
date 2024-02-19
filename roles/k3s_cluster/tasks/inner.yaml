@@ -1,0 +1,60 @@
+---
+
+- name: Check Services
+  service_facts:
+  delegate_to: "{{ inner_var_name }}"
+
+- debug:
+    msg: firewalld found!
+  when: "'firewalld.service' in services"
+
+- debug:
+    msg: UFW found!
+  when: "'ufw.service' in services"
+
+- name: Start firewalld
+  become: yes
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+  delegate_to: "{{ inner_var_name }}"
+  when: "'firewalld.service' in services and 'ufw.service' not in services"
+
+- name: K3S Permit firewalld
+  become: yes
+  ansible.posix.firewalld:
+    port: "{{ item }}"
+    state: enabled
+    immediate: true
+    permanent: true
+  delegate_to: "{{ inner_var_name }}"
+  with_items: 
+    - [22/tcp,2379-2380/tcp,6443/tcp,8472/udp,10250/tcp]
+  when: "'firewalld.service' in services and 'ufw.service' not in services"
+
+- name: Stop firewalld
+  become: yes
+  ansible.builtin.service:
+    name: firewalld
+    state: stopped
+  delegate_to: "{{ inner_var_name }}"
+  when: "'firewalld.service' in services and 'ufw.service' not in services"  
+
+- name: Start UFW
+  become: yes
+  ansible.builtin.service:
+    name: ufw
+    state: started
+  delegate_to: "{{ inner_var_name }}"
+  when: "'ufw.service' in services"
+
+- name: K3S Permit UFW
+  become: yes
+  community.general.ufw:
+    port: "{{ item.port }}"
+    rule: allow
+    proto: "{{ item.proto }}"
+  delegate_to: "{{ inner_var_name }}"
+  with_items: 
+    - [{port: 22, proto: tcp},{port: 2379:2380, proto: tcp},{port: 6443, proto: tcp},{port: 8472, proto: udp},{port: 10250, proto: tcp}]
+  when: "'ufw.service' in services"

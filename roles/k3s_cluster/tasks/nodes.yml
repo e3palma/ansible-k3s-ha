@@ -1,0 +1,31 @@
+---
+- name: Create agent and join {{groups.master.0}} with k3s {{k3s_version}}
+  command:
+  args:
+    argv:
+      - k3sup
+      - join
+      - --ip
+      - "{{hostvars[item].ansible_default_ipv4.address}}"
+      - --user
+      - "{{hostvars[item].ansible_user}}"
+      - sudo
+      - --server-ip
+      - "{{hostvars[groups.master.0].ansible_facts.ens192.ipv4.address}}"
+      - --server-user
+      - "debadmin"
+      - --ssh-key
+      - "{{ssh_key}}"
+      - --k3s-version
+      - "{{k3s_version}}"
+      - --k3s-extra-args
+      - "--node-label \"longhorn=true\" --node-label \"worker=true\""
+  with_items: "{{ groups['slave'] }}"
+  when: master_created is succeeded and http_api_result is succeeded
+  register: slave_joined
+  ignore_errors: yes
+
+
+- name: Debug report of slave joined
+  debug: var=slave_joined
+  when: slave_joined is failed or debug_nodes

@@ -1,0 +1,82 @@
+---
+
+- name: Install Kube-VIP
+  kubernetes.core.k8s:
+    state: present
+    definition: '{{ item }}'
+    namespace: cert-manager
+  with_items: '{{ lookup("url", "https://raw.githubusercontent.com/kube-vip/kube-vip-cloud-provider/main/manifest/kube-vip-cloud-controller.yaml", split_lines=False) | from_yaml_all | list }}'
+
+- name: Install Metallb
+  kubernetes.core.k8s:
+    state: present
+    definition: '{{ item }}'
+  with_items:
+  - '{{ lookup("url", "https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/namespace.yaml", split_lines=False) | from_yaml_all | list }}'
+  - '{{ lookup("url", "https://raw.githubusercontent.com/metallb/metallb/v0.13.12/config/manifests/metallb-native.yaml", split_lines=False) | from_yaml_all | list }}'
+
+- name: LB Range
+  template:
+    src: "lbrange.yaml.j2"
+    dest: /home/{{ lookup('env','USER') }}/ipAddressPool.yaml
+    owner: "{{ lookup('env','USER') }}"
+    group: "{{ lookup('env','USER') }}"
+    mode: 0644
+
+- name: Wait for metallb-system
+  shell: |
+    kubectl wait --namespace metallb-system \
+                    --for=condition=ready pod \
+                    --selector=component=controller \
+                    --timeout=120s
+  register: metallbstatus
+  tags: status
+
+- name: Metallbstatus
+  debug: var=metallbstatus
+  tags: status
+
+- name: Deploy IP Pools
+  kubernetes.core.k8s:
+    state: present
+    src: '{{ item }}'
+  with_items:
+  - /home/{{ lookup('env','USER') }}/ipAddressPool.yaml
+
+- name: Deploy IP Pools and l2Advertisement
+  kubernetes.core.k8s:
+    state: present
+    definition: '{{ item }}'
+  with_items:
+  - '{{ lookup("url", "https://raw.githubusercontent.com/JamesTurland/JimsGarage/main/Kubernetes/K3S-Deploy/l2Advertisement.yaml", split_lines=False) | from_yaml_all | list }}'                    
+
+- name: Get Kubestatus
+  shell: |
+    kubectl get nodes
+    kubectl get svc
+    kubectl get pods --all-namespaces -o wide
+  register: kubestatus
+  tags: status
+
+- name: kubestatus
+  debug: var=kubestatus
+  tags: status
+
+- name: Deploy NGINX
+  kubernetes.core.k8s:
+    state: present
+    namespace: default
+    definition: '{{ item }}'
+  with_items:
+  - '{{ lookup("url", "https://raw.githubusercontent.com/inlets/inlets-operator/master/contrib/nginx-sample-deployment.yaml ", split_lines=False) | from_yaml_all | list }}'                    
+
+- name: Expose NGINX
+  kubernetes.core.k8s_service:
+    state: present
+    name: nginx-1
+    namespace: default # Adjust namespace if needed
+    ports:
+      - port: 80
+    type: LoadBalancer
+
+

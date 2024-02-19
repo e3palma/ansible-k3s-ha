@@ -1,0 +1,105 @@
+---
+
+- name: Make .Kube
+  file:
+    path: /home/{{ lookup('env','USER') }}/.kube
+    state: directory
+    mode: 0755
+
+- name: Firewall loop
+  include_tasks: inner.yaml
+  with_items: '{{ cluster }}'
+  loop_control:
+     loop_var: inner_var_name
+  vars:
+   cluster:
+    - "{{ groups['k3s_cluster']}}"
+
+- name: Create master1 server with k3s "{{k3s_version}}"
+  command:
+  args:
+    argv:
+      - k3sup
+      - install
+      - --ip
+      - "{{hostvars[item].ansible_facts.ens192.ipv4.address}}"
+      - --user
+      - "{{hostvars[groups.master.0].ansible_user}}"
+      - --tls-san
+      - "{{vip}}"
+      - --cluster
+      - --k3s-version
+      - "{{k3s_version}}"
+      - --k3s-extra-args
+      - "--disable traefik --disable servicelb --flannel-iface={{interface}} --node-ip={{hostvars[item].ansible_facts.ens192.ipv4.address}} --node-taint node-role.kubernetes.io/master=true:NoSchedule"
+      - --merge
+      - --sudo
+      - --local-path
+      - "$HOME/.kube/config"
+      - --ssh-key
+      - "{{ssh_key}}"
+      - --context
+      - "k3s-ha"
+  with_items: "{{ groups['master'] }}"
+  register: master_created
+  ignore_errors: yes
+
+
+- name: Debug report of master creation
+  debug: var=master_created
+  when: debug_master or master_created is failed
+
+- name: Check API availability of master servers
+  uri:
+    url: "https://{{hostvars[item].ansible_facts.ens192.ipv4.address}}:6443"
+    method: GET
+    validate_certs: False
+    status_code: 401
+    body_format: json
+  with_items: "{{ groups['master'] }}"
+  register: http_api_result
+  retries: 6
+  delay: 15
+  until: http_api_result is not failed
+  when: master_created is succeeded
+  tags: checkapi
+
+- name: Debug report of API availability
+  debug: var=http_api_result
+  when: http_api_result is failed or debug_master
+
+- name: VIP
+  include_tasks: vip.yml
+
+- name: Create other masters server with k3s "{{k3s_version}}"
+  command:
+  args:
+    argv:
+      - k3sup
+      - join
+      - --ip
+      - "{{hostvars[item].ansible_facts.ens192.ipv4.address}}"
+      - --user
+      - "{{hostvars[item].ansible_user}}"
+      - --sudo
+      - --k3s-version
+      - "{{k3s_version}}"
+      - --server
+      - --tls-san
+      - "{{vip}}"
+      - --server-ip
+      - "{{hostvars[groups.master.0].ansible_facts.ens192.ipv4.address}}"
+      - --ssh-key
+      - "{{ssh_key}}"
+      - --k3s-extra-args
+      - "--disable traefik --disable servicelb --flannel-iface={{interface}} --node-ip={{hostvars[item].ansible_facts.ens192.ipv4.address}} --node-taint node-role.kubernetes.io/master=true:NoSchedule"
+      - --server-user
+      - "debadmin"
+  with_items: "{{ groups['masters'] }}"
+  register: masters_created
+  ignore_errors: yes
+
+
+- name: Debug report of masters creation
+  debug: var=master_created
+  when: debug_master or masters_created is failed  

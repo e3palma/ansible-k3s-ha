@@ -1,0 +1,19 @@
+---
+- name: Check if k3sup exists
+  stat:
+    path: "/usr/local/bin/kubectl"
+  register: path_exists
+
+- name: Download and install software with curl (AMD64)
+  become: yes
+  script: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  when:
+    - ansible_architecture == "x86_64"
+    - not path_exists.stat.exists
+
+- name: Download and install software with curl (Arm64)
+  become: yes
+  script: curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/arm64/kubectl" && sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  when:
+    - ansible_architecture == "aarch64"
+    - not path_exists.stat.exists
