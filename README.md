@@ -4,6 +4,8 @@
 
 This playbook sets up a k3s cluster in High-Availability (HA) and installs Rancher and Longhorn.
 
+How to use script
+--------------
 ...
 run ./play.sh
 # when promoted for BECOME password for local pc running script
