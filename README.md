@@ -6,10 +6,11 @@ This playbook sets up a k3s cluster in High-Availability (HA) and installs Ranch
 
 How to use script
 --------------
-...
+```
+
 run ./play.sh
 # when promoted for BECOME password for local pc running script
-...
+```
 
 Credits and many thanks to
 - [Ansible-k3sup](https://github.com/OmegaSquad82/) this play book originally started as a fork from [Ansible-k3sup](https://github.com/OmegaSquad82/ansible-k3sup)
