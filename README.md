@@ -18,7 +18,7 @@ Credits and many thanks to
 - [alexellis](https://github.com/alexellis) for [k3sup](https://k3sup.dev/),
 - [RobeDevOps](https://github.com/RobeDevOps) for [ansible-k3s](https://github.com/RobeDevOps/ansible-k3s) 
 - [itwars](https://github.com/itwars) for the inspiring [playbook](https://github.com/rancher/k3s/tree/master/contrib/ansible)
-- [JimsGarage](https://github.com/JamesTurland/JimsGarage)
+- [JimsGarage](https://github.com/JamesTurland/JimsGarage) fir his video tutorials and [K3S script](https://github.com/JamesTurland/JimsGarage/tree/main/Kubernetes/K3S-Deploy)
 
 This configuration is defined in the inventory/hosts.ini file but without the ansible workstation node.
 
