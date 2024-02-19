@@ -4,12 +4,16 @@
 
 This playbook sets up a k3s cluster in High-Availability (HA) and installs Rancher and Longhorn.
 
+...
 run ./play.sh
+# when promoted for BECOME password for local pc running script
+...
 
 Credits and many thanks to
+- [Ansible-k3sup](https://github.com/OmegaSquad82/) this play book originally started as a fork from [Ansible-k3sup](https://github.com/OmegaSquad82/ansible-k3sup)
 - [Rancher](https://rancher.com/) the creators of [k3s](https://k3s.io),
 - [alexellis](https://github.com/alexellis) for [k3sup](https://k3sup.dev/),
-- [RobeDevOps](https://github.com/RobeDevOps) for [ansible-k3s](https://github.com/RobeDevOps/ansible-k3s) which this is a fork of and last, not least
+- [RobeDevOps](https://github.com/RobeDevOps) for [ansible-k3s](https://github.com/RobeDevOps/ansible-k3s) 
 - [itwars](https://github.com/itwars) for the inspiring [playbook](https://github.com/rancher/k3s/tree/master/contrib/ansible)
 - [JimsGarage](https://github.com/JamesTurland/JimsGarage)
 
