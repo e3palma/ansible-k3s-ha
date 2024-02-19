@@ -2,14 +2,15 @@ Role Name
 =========
 
 This role creates the [k3s](https://k3s.io) master server, tests for it's API
-availability and then lets all slaves join the cluster. Kickstarting KUBECONFIG
+availability, then creates X other masters to create high-availability cluster using [Kube-vip](https://kube-vip.io/) and joins slaves to the cluster.
 env variable and kubeconfig file set up at '~/.kube/config' path.
+Launches Rancher and Longhorn deployment
 
 Requirements
 ------------
 * Container flags cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
-* Static IPs of master and slaves known to the role
-* Precreated user with passwordless sudo capability
+* Static IPs or DNS resolves hostname of master and slaves known to the role
+
 
 
 Role Variables
