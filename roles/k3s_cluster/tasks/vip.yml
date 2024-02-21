@@ -4,15 +4,6 @@
   command:
     cmd: kubectl apply -f https://kube-vip.io/manifests/rbac.yaml
 
-# - name: Download vip rbac manifest to first master
-#   ansible.builtin.get_url:
-#     url: "https://raw.githubusercontent.com/kube-vip/kube-vip/{{ kube_vip_tag_version }}/docs/manifests/rbac.yaml"
-#     dest: "/tmp/vip-rbac.yaml"
-#     owner: root
-#     group: root
-#     mode: 0644
-# 
-
 - name: Create manifests directory on first master
   become: yes
   file:
@@ -21,7 +12,8 @@
     owner: root
     group: root
     mode: 0644
-  delegate_to: debianvmk1
+  delegate_to: "{{item}}"
+  with_items: "{{ groups['master'][0] }}"
 
 - name: Copy vip manifest to first master
   become: yes
@@ -31,4 +23,5 @@
     owner: root
     group: root
     mode: 0644
-  delegate_to: debianvmk1
+  delegate_to: "{{item}}"
+  with_items: "{{ groups['master'][0] }}"

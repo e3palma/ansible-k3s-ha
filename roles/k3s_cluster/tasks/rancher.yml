@@ -3,18 +3,18 @@
 - name: Helm Install
   become: yes
   shell: |
-    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-    chmod 700 get_helm.sh
-    chown {{ lookup('env','USER') }}:{{ lookup('env','USER') }} get_helm.sh
-    ./get_helm.sh
-    helm plugin install https://github.com/databus23/helm-diff > /dev/null
+    if [ ! -f /usr/local/bin/helm ]; then
+      curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+      chmod 700 get_helm.sh
+      chown {{ lookup('env','USER') }}:{{ lookup('env','USER') }} get_helm.sh    
+      ./get_helm.sh
+    fi
+    helm plugin install https://github.com/databus23/helm-diff &> /dev/null
   register: helmstatus
   ignore_errors: yes
   tags: status
 
-- name: helmstatus
-  debug: var=helmstatus
-  tags: status
+
 
 - name: Helm add Rancher Repo
   kubernetes.core.helm_repository:
@@ -59,10 +59,6 @@
     namespace: cert-manager
   register: certmanager
 
-- name: Cert-Manager Status
-  debug: var=certmanager
-  tags: status  
-
 - name: Deploy Rancher
   kubernetes.core.helm:
     name: rancher
@@ -89,15 +85,30 @@
   debug: var=rancher
   tags: status
 
-- name: Expose Rancher
-  kubernetes.core.k8s_service:
-    state: present
-    name: rancher-lb
-    namespace: cattle-system # Adjust namespace if needed
-    ports:
-      - port: 443
-    type: LoadBalancer
+- name: Gather information about the Rancher deployment
+  kubernetes.core.k8s:
+    api_version: apps/v1
+    kind: Deployment
+    name: rancher
+    namespace: cattle-system
+  register: app_labels
 
+- name: Expose Rancher
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:  
+        name: rancher-lb
+        namespace: cattle-system # Adjust namespace if needed
+        labels: "{{ app_labels.result.metadata.labels }}"
+      spec:
+        selector:
+          app: rancher
+        ports:
+          - port: 443
+        type: LoadBalancer
 
 - name: Wait for Rancher
   shell: |

@@ -31,7 +31,7 @@
       - --k3s-version
       - "{{k3s_version}}"
       - --k3s-extra-args
-      - "--disable traefik --disable servicelb --flannel-iface={{interface}} --node-ip={{hostvars[item].ansible_facts.ens192.ipv4.address}} --node-taint node-role.kubernetes.io/master=true:NoSchedule"
+      - "--disable traefik --disable servicelb --flannel-iface={{kube_vip_iface}} --node-ip={{hostvars[item].ansible_facts.ens192.ipv4.address}} --node-taint node-role.kubernetes.io/master=true:NoSchedule"
       - --merge
       - --sudo
       - --local-path
@@ -92,7 +92,7 @@
       - --ssh-key
       - "{{ssh_key}}"
       - --k3s-extra-args
-      - "--disable traefik --disable servicelb --flannel-iface={{interface}} --node-ip={{hostvars[item].ansible_facts.ens192.ipv4.address}} --node-taint node-role.kubernetes.io/master=true:NoSchedule"
+      - "--disable traefik --disable servicelb --flannel-iface={{kube_vip_iface}} --node-ip={{hostvars[item].ansible_facts.ens192.ipv4.address}} --node-taint node-role.kubernetes.io/master=true:NoSchedule"
       - --server-user
       - "debadmin"
   with_items: "{{ groups['masters'] }}"

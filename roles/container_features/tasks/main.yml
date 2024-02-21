@@ -20,6 +20,35 @@
     state: present
   when: ansible_facts['distribution_file_variety'] == 'RedHat'
 
+- name: Add sudo to Sudo
+  file:
+    path: /tmp/sudo
+    state: touch
+    owner: root
+    group: root
+    mode: 600
+
+- name: Add sudo to sudoers debian
+  lineinfile:
+    dest: /tmp/sudo
+    state: present
+    line: "{{ item }}"
+  loop: 
+    - '%sudo ALL=(ALL) NOPASSWD:ALL'
+  when: ansible_facts['distribution_file_variety'] == 'Debian'
+
+- name: Add wheel to sudoers RedHat
+  lineinfile:
+    dest: /tmp/sudo
+    state: present
+    line: "{{ item }}"
+  loop: 
+    - '%wheel        ALL=(ALL)       NOPASSWD: ALL'
+  when: ansible_facts['distribution_file_variety'] == 'RedHat'
+
+- name: Sudoers Check
+  shell:   visudo -q -c -f /tmp/sudo && cp -f /tmp/sudo /etc/sudoers.d/ && rm /tmp/sudo  
+
 - name: Verify cgroup flags are enabled
   lineinfile:
     path: /boot/cmdline.txt

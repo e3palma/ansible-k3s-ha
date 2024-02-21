@@ -20,13 +20,9 @@
   register: longhorn
   tags: longorn
 
-- name: Longhorn
-  debug: var=longhorn
-  tags: longhorn
-
 - name: Deploy Longhorn Status
   shell: |
-    kubectl get pods --namespace longhorn-system --watch
+    kubectl get pods --namespace longhorn-system
     kubectl get nodes
     kubectl get svc -n longhorn-system
   register: longhornstatus

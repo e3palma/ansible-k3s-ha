@@ -10,11 +10,8 @@ ssh_key: /home/{{ lookup('env','USER') }}/.ssh/id_rsa #k3s_cluster/master.yml
 lbrange: 10.10.1.201-10.10.1.210 # lbrange.yaml.j2
 
 vip: 10.10.1.200 #k3s_cluster/master.yml
-flannel_iface: "ens192"
-interface: ens192 #k3s_cluster/master.yml
 kube_vip_iface: ens192  #vip.yaml.j2 
-apiserver_endpoint: 10.10.1.200 #vip.yaml.j2 
 kube_vip_tag_version: v0.6.3 #vip.yaml.j2 
 
 hostname: rancher.domain.internal
-bootstrapPassword: admin
+bootstrapPassword: password

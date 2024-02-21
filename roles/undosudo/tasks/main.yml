@@ -1,0 +1,16 @@
+---
+
+
+- name: Remove sudo to sudoers debian
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/sudo
+    state: absent
+    regexp: '^%sudo'
+  when: ansible_facts['distribution_file_variety'] == 'Debian'
+
+- name: Remove sudo to sudoers debian RedHat
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/sudo
+    state: absent
+    regexp: '%wheel'
+  when: ansible_facts['distribution_file_variety'] == 'RedHat'

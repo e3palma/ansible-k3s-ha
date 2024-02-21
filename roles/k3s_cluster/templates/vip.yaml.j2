@@ -59,7 +59,7 @@ spec:
         - name: vip_retryperiod
           value: "2"
         - name: address
-          value: {{ apiserver_endpoint }}
+          value: {{ vip }}
         image: ghcr.io/kube-vip/kube-vip:{{ kube_vip_tag_version }}
         imagePullPolicy: Always
         name: kube-vip
