@@ -10,6 +10,9 @@ How to use script
 run ./play.sh
 
 # when promoted for BECOME password enter password for local pc running script
+# If Master and slave nodes are configured with passwordless sudo (insecure) remove the following lines from main.yml
+  vars:
+    ansible_sudo_pass: "{{ pass }}"
 
 ```
 
@@ -71,8 +74,12 @@ Playbook example
 -------------------
 ```
 ---
+---
 - hosts: k3s_cluster
   become: yes
+  vars_files: inventory/group_vars/secret.yml
+  vars:
+    ansible_sudo_pass: "{{ pass }}"
   roles:
     - container_features
     - dphys_swapfile
@@ -81,4 +88,12 @@ Playbook example
   roles:
     - bootstrap_k3sup
     - k3s_cluster
+
+- hosts: k3s_cluster
+  become: yes
+  vars_files: inventory/group_vars/secret.yml
+  vars:
+    ansible_sudo_pass: "{{ pass }}"
+  roles:
+    - undosudo
 ```
