@@ -19,7 +19,7 @@
 - name: Helm add Rancher Repo
   kubernetes.core.helm_repository:
     name: rancher-latest
-    repo_url: https://releases.rancher.com/server-charts/latest
+    repo_url: https://releases.rancher.com/server-charts/stable
   register: helmrepo
   tags: status
 
@@ -62,7 +62,7 @@
 - name: Deploy Rancher
   kubernetes.core.helm:
     name: rancher
-    chart_ref: rancher-latest/rancher
+    chart_ref: rancher-stable/rancher
     release_namespace: cattle-system
     create_namespace: true
     release_values:
